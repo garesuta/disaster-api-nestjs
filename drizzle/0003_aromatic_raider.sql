@@ -1,0 +1,1 @@
+ALTER TABLE "areas" ADD COLUMN "created_at" time DEFAULT now() NOT NULL;

@@ -1,0 +1,1 @@
+ALTER TABLE "trucks" ADD COLUMN "is_assigned" boolean DEFAULT false NOT NULL;
