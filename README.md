@@ -1,50 +1,110 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[Disaster Resource Allocation API](https://disaster-app-c0gudrgjgtgncfgv.southeastasia-01.azurewebsites.net/api#/) API using **Nestjs**
 
-## Project setup
+## Problems
 
-```bash
-$ npm install
-```
+- to allocate emergency resource to affected area after natural disaster
+- areas with higher emergency and tighter constrains receive resource first
 
-## Compile and run the project
+## Requirement
 
-```bash
-# development
-$ npm run start
+- adding affected area
+- adding resource trucks
+- processes truck assignment by resource matching (area <> truck)
+- return last processed assignment (cached by Redis)
 
-# watch mode
-$ npm run start:dev
+### Require Logics
 
-# production mode
-$ npm run start:prod
-```
+- resource matching (area <> truck)
+- travel time constraint (area, area <> truck)
+- priority by urgency
+- redis caching
+- assignment persistence (cached by redis for 30 minutes)
 
-## Run tests
+## Summary Problems
+
+In summary, we have an **_affected area_** with require resources {eg.food,water} need to transfer within their **_time constraints_** and **_the truck_** that provided resources for. Matching them with resource and time constraints as **_an assignment_** results by **_higher urgency_** priority.
+
+![problem](./assets/images/problem.png)
+_problem summary picture_
+
+## What we gonna do ?
+
+- How we created an input data ? (area,truck,resource) --> (json,dict format)
+- How we matching between area, resource and truck by their constraints ? (area <> truck)
+- How we caching a results ?
+- How we documentation an API for client team and How we deploy an apps ?
+
+## Project Design
+
+how we design system --> Problem base driven design.<br />
+
+1.  Platform design
+2.  Database design
+3.  Program design (Logics)
+
+### 1. Platform design (Stacks)
+
+**NestJS + Drizzle + Neon(_Serverless PostgreSQL_) + Redis** <br />
+
+Why we use **NestJS** ?<br />
+
+- **Typescript** support
+- **Modular** architect
+- **OOP** support
+- Database integration (ORM support)
+- Documentation (support **Swagger**)
+- Auto reloading (built-in), we don't need **nodemon** anymore :D<br />
+
+Why we selected **Drizzle** ?<br />
+
+We can use as an ORM and Migration tools for database connection.<br />
+
+- Typed SQL
+- SQL Like
+- Lightweight
+
+Why we selected **Neon** ?<br />
+
+- Free serverless PostgreSQL
+- Easy for integrations
+- Data type support (json)
+
+### Summary tools for development
+
+- Node.js Framework - **_NestJS_**
+- Languages - **_Typescript_**
+- Database integration - **_Drizzle_**
+- Documentation - **_Swagger_**
+- Caching - **_Redis by Keyv_**
+- Testing - **_Postman_ , _DBeaver_**
+
+### 2. Database design
+
+1. **gathering requirements** - gather require from problems
+2. **write nouns** - entities that need to be created
+3. **design schema** - how we store a data in our storage
+
+![design schema](./assets/images/disaster.png)
+
+### 3. Program design (Logics)
+
+We use a concept of modular and layered code, so we split a code into 2 group 4 module, 3 modules handle for business logics and 1 module stand for entities.
+
+Business logics module
+
+1. **area (disaster)** - handle for area input
+2. **trucks** - handle for truck input
+3. **assignment** - handle a process of an assignment including cached
+
+Entities module
+
+1. **database** - handle for all entities in our API
+
+![programmingdesign](./assets/images/programdesign.png)
+
+<!-- ## Run tests
 
 ```bash
 # unit tests
@@ -55,22 +115,28 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
-```
+``` -->
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Deployment on both Railway and Azure Cloud Registry
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+On Azure [Disaster Resource Allocation API](https://disaster-app-c0gudrgjgtgncfgv.southeastasia-01.azurewebsites.net/api#/)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+1. Image - ACR
+2. Database - Neon
+3. Caching - Azure Cache for Redis
+4. Deploying platform - Linux
+5. Documenting - Swagger
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+On Railway [Disaster Resource Allocation API](https://disaster-api-nestjs-production.up.railway.app/api#/)
 
-## Resources
+1. Docker Image - Github
+2. Database - Neon
+3. Redis - docker image on Railway
+4. Documenting - Swagger
+
+<!-- ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:
 
@@ -95,4 +161,4 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE). -->

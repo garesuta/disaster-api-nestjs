@@ -1,0 +1,47 @@
+table areas {
+  area_id text [pk, not null]
+  urgency_level integer [not null]
+  time_constraints integer [not null]
+  is_assigned boolean [not null, default: false]
+  created_at time [not null, default: `now()`]
+}
+
+table area_resources {
+  id serial [pk, not null, increment]
+  area_id text [not null]
+  resourceType text [not null]
+  quantity integer [not null]
+}
+
+table travel_time_to_area {
+  id serial [pk, not null, increment]
+  truck_id text [not null]
+  area_id text [not null]
+  hours integer [not null]
+}
+
+table trucks_resource {
+  id serial [pk, not null, increment]
+  truck_id text [not null]
+  resource_type text [not null]
+  quantity integer [not null]
+}
+
+table trucks {
+  truck_id text [pk, not null]
+  is_assigned boolean [not null, default: false]
+}
+
+table assignments {
+  id serial [pk, not null, increment]
+  area_id text [not null]
+  truck_id text
+  resource_delivered jsonb
+  created_at time [default: `now()`]
+}
+
+table urgencyLevel {
+  id serial [pk, not null, increment]
+  name text [not null]
+  description text [not null]
+}
